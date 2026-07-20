@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  grafana:
+    image: "grafana/grafana:10.0.3"
+    container_name: grafana
+    env_file: ./.env
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning
+      - ./dashboards:/var/lib/grafana/dashboards
+      - grafana_storage:/var/lib/grafana
+    environment:
+      - LOKI_SERVER_URL=${LOKI_SERVER_URL}
+
+volumes:
+  grafana_storage:

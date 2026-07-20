@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  loki:
+    image: "grafana/loki:2.8.4"
+    container_name: loki
+    env_file: ./.env
+    ports:
+      - "${LOKI_PORT}:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/data
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+
+volumes:
+  loki_data:

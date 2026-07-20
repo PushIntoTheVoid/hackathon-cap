@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  promtail:
+    image: "grafana/promtail:2.8.4"
+    container_name: promtail
+    env_file: ./.env
+    environment:
+      - LOKI_PATH=${LOKI_SERVER_URL}/loki/api/v1/push
+    volumes:
+      - ${LOG_PATH}:/tmp/logs:ro
+      - ./promtail.yml:/etc/promtail/config.yaml
+      - promtail_data:/data
+    command:
+      - -config.file=/etc/promtail/config.yaml
+      - -config.expand-env=true
+
+volumes:
+  promtail_data:

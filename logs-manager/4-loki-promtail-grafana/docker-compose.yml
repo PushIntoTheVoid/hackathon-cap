@@ -1,0 +1,55 @@
+version: "3"
+
+networks:
+  loki_net:
+
+services:
+  loki:
+    image: "grafana/loki:2.8.4"
+    container_name: loki
+    env_file: ./.env
+    ports:
+      - "${LOKI_PORT}:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/data
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+    networks:
+      - loki_net
+
+  promtail:
+    image: "grafana/promtail:2.8.4"
+    container_name: promtail
+    env_file: ./.env
+    environment:
+      - LOKI_PATH=${LOKI_SERVER_URL}/loki/api/v1/push
+    volumes:
+      - ${LOG_PATH}:/tmp/logs:ro
+      - ./promtail.yml:/etc/promtail/config.yaml
+      - promtail_data:/data
+    command:
+      - -config.file=/etc/promtail/config.yaml
+      - -config.expand-env=true
+    networks:
+      - loki_net
+
+  grafana:
+    image: "grafana/grafana:10.0.3"
+    container_name: grafana
+    env_file: ./.env
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning
+      - ./dashboards:/var/lib/grafana/dashboards
+      - grafana_storage:/var/lib/grafana
+    environment:
+      - LOKI_SERVER_URL=${LOKI_SERVER_URL}
+    networks:
+      - loki_net
+
+volumes:
+  loki_data:
+  promtail_data:
+  grafana_storage:
